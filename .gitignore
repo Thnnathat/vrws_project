@@ -1,0 +1,8 @@
+/vrws-env
+/Ecosystem/ZED-2i/*.whl
+**/__pycache__
+/Dataset
+/.vscode
+/vision/runs/detect/
+!/train7/
+**yolov8m.pt
