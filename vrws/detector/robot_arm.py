@@ -1,18 +1,18 @@
-from vrws.detector.detector import Zed2i
+from detector import Detector
 from time import sleep
 from threading import Thread
 
 class RobotArm(Thread):
-    def __init__(self, zed):
+    def __init__(self, det):
         super().__init__()
-        self.zed: Zed2i = zed
+        self.det: Detector = det
         self.exit_signal: bool = False
 
     def run(self):
         print("-"*20)
         while not self.exit_signal:
-            if self.zed.data_flow.obj is not None:
-                string = f"Robot get: {self.zed.data_flow.obj.id}"
+            if self.det.data_flow.obj is not None:
+                string = f"Robot get: {self.det.data_flow.obj.id}"
                 print('-' * 20)
                 print(string)
             else:

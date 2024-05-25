@@ -3,15 +3,14 @@ import pyzed.sl as sl
 from pyzed.sl import Camera, Mat, Pose, Objects, CustomBoxObjectData
 from zed2i_config import Zed2iInitParameters, Zed2iRuntimeParameters, Zed2iObjectDetectionParameters, Zed2iObjectDetectionRuntimeParameters, Zed2iPositionalTrackingParameters
 from threading import Thread, Lock
-from time import sleep, time
+from time import sleep
 from ultralytics import YOLO
 import cv2
 import numpy as np
 from viewer.render import Viewer, GuideLine
 from data_flow import DataFlow
 
-
-class Zed2i():
+class Detector():
     def __init__(self) -> None:
 
         # สร้างตัวแปรแบบ global ใน class
@@ -26,11 +25,10 @@ class Zed2i():
         self.image_left: Mat = Mat()
         self.img_in_torch = None
         
-        
         # สร้าง, จัดการ Thread
         self.lock: Lock = Lock()
         self.t_torch = Thread(target=self.torch_thread, args=(), kwargs={'weights': 'best.pt', 'img_size': 640, "conf_thres": 0.4})
-        self.t_loop = Thread(target=self.loop)
+        self.t_loop = Thread(target=self.camera_thread)
 
         # เลือก model
         model = 'best'
@@ -61,17 +59,6 @@ class Zed2i():
 
         self.obj_runtime_param = Zed2iObjectDetectionRuntimeParameters()
 
-        # Display
-        camera_infos = self.zed.get_camera_information()
-        camera_res = camera_infos.camera_configuration.resolution
-
-        # Utilities for 2D display
-        self.display_resolution = sl.Resolution(min(camera_res.width, 1280), min(camera_res.height, 720))
-        self.image_scale = [self.display_resolution.width / camera_res.width, self.display_resolution.height / camera_res.height]
-        self.image_left_ocv = np.full((self.display_resolution.height, self.display_resolution.width, 4), [245, 239, 239, 255], np.uint8)
-        
-        self.frame_width, self.frame_height = self.getImgSizeFromCamRes()
-        self.center_frame = (self.frame_width // 2, self.frame_height // 2) # (width, height)
         self.guide_line = GuideLine()
         
     def start(self) -> None:
@@ -103,7 +90,7 @@ class Zed2i():
         print("Camera is openned.")
         return status
 
-    def loop(self) -> None:
+    def camera_thread(self) -> None:
         while not self.exit_signal:
             if self.zed.grab(self.runtime_params) == sl.ERROR_CODE.SUCCESS:
                 # -- Get the image
@@ -124,18 +111,7 @@ class Zed2i():
                 self.lock.release()
                 self.zed.retrieve_objects(self.objects, self.obj_runtime_param)
                 
-                self.zed.retrieve_image(self.image_left, sl.VIEW.LEFT, sl.MEM.CPU, self.display_resolution)
-                np.copyto(self.image_left_ocv, self.image_left.get_data())
-                
-                self.viewer.render_2D(self.image_left_ocv, self.image_scale, self.objects, self.obj_param.enable_tracking)
                 self.data_flow.insert_data_static(self.objects, self.obj_param.enable_tracking)
-                self.guide_line.draw_star_line_center_frame(self.image_left_ocv)
-                
-                cv2.imshow("ZED | 2D View", self.image_left_ocv)
-                # cv2.imshow("Image in torch.", self.img_in_torch)
-                key = cv2.waitKey(10)
-                if key & 0XFF == ord('q'):
-                    self.exit_signal = True
             else:
                 self.exit_signal = True
         self.zed.close()
@@ -148,10 +124,6 @@ class Zed2i():
             if self.run_signal:
                 self.lock.acquire()
                 img = cv2.cvtColor(self.image_net, cv2.COLOR_BGRA2BGR)
-                # cv2.line(img, (img.shape[0] // 2, 0), (img.shape[0] // 2, img.shape[1]), (0, 0, 255))
-                # self.img_in_torch = cv2.circle(img, self.center_frame, 1, (0, 255, 0), 2)
-                # self.guide_line.draw_star_line_center_frame(self.img_in_torch, self.center_frame, self.frame_width, self.frame_height)
-                # https://docs.ultralytics.com/modes/predict/#video-suffixes
                 det = self.model.predict(img, save=False, imgsz=img_size, conf=conf_thres, iou=iou_thres, verbose=False)[0].cpu().numpy().boxes
                 # ZED CustomBox format (with inverse letterboxing tf applied)
                 self.detections = self.detections_to_custom_box(det, self.image_net) # ได้ BBox มา
@@ -204,5 +176,5 @@ class Zed2i():
 
 
 if __name__ == "__main__":
-    zed2i = Zed2i()
-    zed2i.start()
+    det = Detector()
+    det.start()
