@@ -5,7 +5,7 @@ from threading import Thread
 from time import sleep
 
 class Main(Thread):
-    def __init__(self, det, disp,robot) -> None:
+    def __init__(self, det: Detector, disp: Display, robot: RobotArm) -> None:
         super().__init__()
         self.name = "Control Thread"
         

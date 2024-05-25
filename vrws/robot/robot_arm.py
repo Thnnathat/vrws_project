@@ -3,7 +3,7 @@ from time import sleep
 from threading import Thread
 
 class RobotArm(Thread):
-    def __init__(self, det):
+    def __init__(self, det: Detector):
         super().__init__()
         self.name = "Robot Thread"
         
