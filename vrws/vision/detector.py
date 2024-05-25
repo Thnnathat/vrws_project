@@ -1,14 +1,14 @@
 from typing import Any, Tuple
 import pyzed.sl as sl
 from pyzed.sl import Camera, Mat, Pose, Objects, CustomBoxObjectData
-from zed2i_config import Zed2iInitParameters, Zed2iRuntimeParameters, Zed2iObjectDetectionParameters, Zed2iObjectDetectionRuntimeParameters, Zed2iPositionalTrackingParameters
+from .zed2i_config import Zed2iInitParameters, Zed2iRuntimeParameters, Zed2iObjectDetectionParameters, Zed2iObjectDetectionRuntimeParameters, Zed2iPositionalTrackingParameters
 from threading import Thread, Lock
 from time import sleep
 from ultralytics import YOLO
 import cv2
 import numpy as np
-from viewer.render import Viewer, GuideLine
-from data_flow import DataFlow
+from vision.viewer.render import Viewer, GuideLine
+from vision.data_flow import DataFlow
 
 class Detector():
     def __init__(self) -> None:
@@ -24,11 +24,13 @@ class Detector():
         self.objects: Objects = Objects()
         self.image_left: Mat = Mat()
         self.img_in_torch = None
+
+        self.sync_frame_tick = False
         
         # สร้าง, จัดการ Thread
         self.lock: Lock = Lock()
-        self.t_torch = Thread(target=self.torch_thread, args=(), kwargs={'weights': 'best.pt', 'img_size': 640, "conf_thres": 0.4})
-        self.t_loop = Thread(target=self.camera_thread)
+        self.t_torch = Thread(target=self.torch_thread, args=(), kwargs={'weights': 'best.pt', 'img_size': 640, "conf_thres": 0.4}, name="PyTourch Thread")
+        self.t_camera = Thread(target=self.camera_thread, name="Camera Thread")
 
         # เลือก model
         model = 'best'
@@ -60,28 +62,26 @@ class Detector():
         self.obj_runtime_param = Zed2iObjectDetectionRuntimeParameters()
 
         self.guide_line = GuideLine()
+
+        # Display
+        camera_infos = self.zed.get_camera_information()
+        camera_res = camera_infos.camera_configuration.resolution
+
+        # Utilities for 2D display
+        self.display_resolution = sl.Resolution(min(camera_res.width, 1280), min(camera_res.height, 720))
+        self.image_scale = [self.display_resolution.width / camera_res.width, self.display_resolution.height / camera_res.height]
+        self.image_left_ocv = np.full((self.display_resolution.height, self.display_resolution.width, 4), [245, 239, 239, 255], np.uint8) 
         
     def start(self) -> None:
         self.exit_signal = False
         self.t_torch.start()
-        self.t_loop.start()
+        self.t_camera.start()
         print("Vision start.")
         
     def stop(self) -> None:
         self.exit_signal = True
         print("Vision stop.")
         
-    def getCamRes(self):
-        cam_res = self.zed.get_camera_information().camera_configuration.resolution
-        return cam_res
-
-    def getImgSizeFromCamRes(self) -> Tuple[int, int]:
-        cam_res = self.getCamRes()
-        img_width = cam_res.width
-        img_height = cam_res.height
-
-        return (img_width, img_height)
-
     def open(self, init_parameter) -> str:
         status = self.zed.open(init_parameter)
         if status != sl.ERROR_CODE.SUCCESS:
@@ -102,20 +102,38 @@ class Detector():
                 
                 # -- Detection running on the other thread
                 while self.run_signal:
+                    if self.exit_signal: break
                     sleep(0.001)
 
                 # Wait for detections
                 self.lock.acquire()
                 # -- Ingest detections
                 self.zed.ingest_custom_box_objects(self.detections)
-                self.lock.release()
                 self.zed.retrieve_objects(self.objects, self.obj_runtime_param)
+                self.lock.release()
+                
+                # self.real_sence()
                 
                 self.data_flow.insert_data_static(self.objects, self.obj_param.enable_tracking)
             else:
                 self.exit_signal = True
         self.zed.close()
 
+    def real_sence(self):
+        self.zed.retrieve_image(self.image_left, sl.VIEW.LEFT, sl.MEM.CPU, self.display_resolution)
+        np.copyto(self.image_left_ocv, self.image_left.get_data())
+
+        self.viewer.render_2D(self.image_left_ocv, self.image_scale, self.objects, self.obj_param.enable_tracking)
+        self.guide_line.draw_star_line_center_frame(self.image_left_ocv)
+
+        # cv2.putText(self.image_left_ocv, fps, (7, 70), cv2.FONT_HERSHEY_SIMPLEX , 3, (100, 255, 0), 3, cv2.LINE_AA) 
+
+        cv2.imshow("Detector", self.image_left_ocv)
+
+        key = cv2.waitKey(10)
+        if key & 0XFF == ord('q'):
+            self.exit_signal = True
+            self.det.exit_signal = True
 
     def torch_thread(self, weights, img_size, conf_thres=0.2, iou_thres=0.45):
         print("Intializing Network...")
@@ -132,7 +150,6 @@ class Detector():
 
             sleep(0.01)
     
-
     def detections_to_custom_box(self, detections, im0):
         output = []
         for i, det in enumerate(detections):

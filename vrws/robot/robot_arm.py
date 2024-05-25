@@ -1,10 +1,12 @@
-from detector import Detector
+from vision.detector import Detector
 from time import sleep
 from threading import Thread
 
 class RobotArm(Thread):
     def __init__(self, det):
         super().__init__()
+        self.name = "Robot Thread"
+        
         self.det: Detector = det
         self.exit_signal: bool = False
 
@@ -16,5 +18,5 @@ class RobotArm(Thread):
                 print('-' * 20)
                 print(string)
             else:
-                print("Wait Object")
+                print("Waiting for Objects")
             sleep(5)
