@@ -1,18 +1,18 @@
 from typing import Any, Tuple
 import pyzed.sl as sl
-from pyzed.sl import Camera, InputType, Mat, Pose, Objects, CustomBoxObjectData
+from pyzed.sl import Camera, Mat, Pose, Objects, CustomBoxObjectData
 from zed2i_config import Zed2iInitParameters, Zed2iRuntimeParameters, Zed2iObjectDetectionParameters, Zed2iObjectDetectionRuntimeParameters, Zed2iPositionalTrackingParameters
 from threading import Thread, Lock
 from time import sleep, time
 from ultralytics import YOLO
 import cv2
 import numpy as np
-from viewer import Viewer, GuideLine
+from viewer.render import Viewer, GuideLine
 from data_flow import DataFlow
 
 
 class Zed2i():
-    def __init__(self, ui_on=True) -> None:
+    def __init__(self) -> None:
 
         # สร้างตัวแปรแบบ global ใน class
         self.data_flow = DataFlow()
@@ -24,7 +24,6 @@ class Zed2i():
         self.cam_w_pose: Pose = Pose()
         self.objects: Objects = Objects()
         self.image_left: Mat = Mat()
-        input_type: sl.InputType = sl.InputType()
         self.img_in_torch = None
         
         
@@ -130,6 +129,7 @@ class Zed2i():
                 
                 self.viewer.render_2D(self.image_left_ocv, self.image_scale, self.objects, self.obj_param.enable_tracking)
                 self.data_flow.insert_data_static(self.objects, self.obj_param.enable_tracking)
+                self.guide_line.draw_star_line_center_frame(self.image_left_ocv)
                 
                 cv2.imshow("ZED | 2D View", self.image_left_ocv)
                 # cv2.imshow("Image in torch.", self.img_in_torch)

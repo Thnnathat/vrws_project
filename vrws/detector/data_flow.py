@@ -1,5 +1,5 @@
 from queue import Queue
-from utils import render_object
+from viewer.utils import render_object
 import pyzed.sl as sl
 class DataFlow:
     def __init__(self):

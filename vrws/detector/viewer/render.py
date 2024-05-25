@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from utils import *
+from .utils import *
 import pyzed.sl as sl
 
 # ----------------------------------------------------------------------
@@ -12,9 +12,11 @@ class GuideLine:
     def __init__(self) -> None:
         pass
 
-    def draw_star_line_center_frame(self, image, center_frame, img_width, img_height):
-        cv2.line(image, (center_frame[0], 0), (center_frame[0], img_height), (0, 0, 255), 1)
-        cv2.line(image, (0, center_frame[1]), (img_width, center_frame[1]), (0, 0, 255), 1)
+    def draw_star_line_center_frame(self, image):
+        center_frame = (int(image.shape[1] // 2), int(image.shape[0] // 2))
+        
+        cv2.line(image, (center_frame[0], 0), (center_frame[0], image.shape[0]), (0, 0, 255), 1)
+        cv2.line(image, (0, center_frame[1]), (image.shape[1], center_frame[1]), (0, 0, 255), 1)
 
     def draw_star_center_object(self, image, center_object, color):
         cv2.line(image, (0, center_object[1]), (image.shape[1], center_object[1]), color, 1)
@@ -96,7 +98,6 @@ class Viewer():
                 
                 guide_line = GuideLine()
                 
-                guide_line.draw_star_line_center_frame(left_display, center_frame, left_display.shape[1], left_display.shape[0])
                 guide_line.draw_star_center_object(left_display, center_object, base_color)
 
                 left_display = cv2.circle(left_display, center_frame, 1, (255, 0, 0), 2)

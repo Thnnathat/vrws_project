@@ -1,4 +1,4 @@
-from camera_sensors import Zed2i
+from vrws.detector.detector import Zed2i
 from time import sleep
 from threading import Thread
 

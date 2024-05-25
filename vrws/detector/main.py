@@ -1,4 +1,4 @@
-from camera_sensors import Zed2i
+from vrws.detector.detector import Zed2i
 from robot_arm import RobotArm
 
 if __name__ == "__main__":
