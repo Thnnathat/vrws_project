@@ -15,6 +15,7 @@ class RobotArm(Thread):
         # self.dobot = DobotCR5(ip)
         # if not self.dobot.is_connected:
         #     self.exit_signal = True
+        # self.dobot.Enable()
             
         self.drop_point: dict[str, float] = {
                                                 "unknow": [0.0, 0.0, 0.0],
@@ -91,6 +92,13 @@ class DobotCR5:
         except:
             self.exit_signal = True
             print("Dobot connection error.")
+        
+    def Enable(self):
+        enableState = self.dashboard.ParseResultId(self.dashboard.EnableRobot())
+        if enableState[0] != 0:
+            print("Failed to enable: Check whether port 29999 is occupied.")
+            return
+        print("Enabled successfully!")
 
     def RunToPoint(self, point_list: list[float], coordinateMode: int):
         while True:
