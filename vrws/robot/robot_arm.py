@@ -14,7 +14,8 @@ class RobotArm(Thread):
         print("-"*20)
         while not self.exit_signal:
             if self.det.data_flow.obj is not None:
-                string = f"Robot get: {self.det.data_flow.obj.id}"
+                obj = self.det.data_flow.obj
+                string = f"Robot get: {obj.id}\nClass: {self.det.model.names[obj.raw_label]}\nPosition X: {obj.position[0]}, Y: {obj.position[1]}, Z: {obj.position[2]}"
                 print('-' * 20)
                 print(string)
             else:

@@ -14,7 +14,7 @@ class Detector():
     def __init__(self) -> None:
 
         # สร้างตัวแปรแบบ global ใน class
-        self.data_flow = DataFlow()
+        self.data_flow: DataFlow = DataFlow()
         self.run_signal: bool = False
         self.exit_signal: bool = False
         self.image_left_tmp: Mat = Mat()

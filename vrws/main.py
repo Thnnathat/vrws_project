@@ -17,6 +17,7 @@ class Main(Thread):
     def run(self):
         while not self.exit_signal:
             if self.det.exit_signal or self.robot.exit_signal or self.disp.exit_signal:
+                print("Stopping...")
                 self.det.exit_signal = self.robot.exit_signal = self.disp.exit_signal  = self.exit_signal = True
             sleep(0.001)
 
@@ -38,4 +39,5 @@ if __name__ == "__main__":
     disp.join()
     robot.join()
     main.join()
+    print("Exit")
     exit()
