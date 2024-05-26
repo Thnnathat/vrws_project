@@ -28,7 +28,7 @@ if __name__ == "__main__":
     disp = Display(det)
     disp.start()
 
-    robot = RobotArm(det)
+    robot = RobotArm(det, '192.168.5.1')
     robot.start()
 
     main = Main(det, disp, robot)

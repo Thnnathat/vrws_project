@@ -2,7 +2,7 @@ from vision.detector import Detector
 from time import sleep
 from threading import Thread
 from typing import Tuple
-from dobot_api import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
+from robot.dobot_api import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
 from threading import Thread
 class RobotArm(Thread):
     def __init__(self, det: Detector, ip: str) -> None:
@@ -12,9 +12,9 @@ class RobotArm(Thread):
         self.det: Detector = det
         self.exit_signal: bool = False
 
-        self.dobot = DobotCR5(ip)
-        if not self.dobot.is_connected:
-            self.exit_signal = True
+        # self.dobot = DobotCR5(ip)
+        # if not self.dobot.is_connected:
+        #     self.exit_signal = True
             
         self.drop_point: dict[str, float] = {
                                                 "unknow": [0.0, 0.0, 0.0],
