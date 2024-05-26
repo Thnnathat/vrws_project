@@ -80,14 +80,14 @@ class DobotCR5:
         self.exit_signal: bool = False
         self.dashboard, self.feed = self.Connect()
 
-        self.t_chearError = Thread(target=self.ClearRobotError)
+        self.t_clearError = Thread(target=self.ClearRobotError)
 
     def Connect(self) -> Tuple[DobotApiDashboard, DobotApiFeedBack]:
         try: 
             dashboard = DobotApiDashboard(self.ip, self.dashboardPort)
             feed = DobotApiFeedBack(self.ip, self.feedPort)
             self.is_connected = True
-            self.t_chearError.start()
+            self.t_clearError.start()
             return dashboard, feed
         except:
             self.exit_signal = True
