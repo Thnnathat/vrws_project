@@ -5,7 +5,7 @@ from typing import Tuple
 from dobot_api import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
 from threading import Thread
 class RobotArm(Thread):
-    def __init__(self, det: Detector, ip: str):
+    def __init__(self, det: Detector, ip: str) -> None:
         super().__init__()
         self.name: str = "Robot Thread"
         
@@ -15,21 +15,53 @@ class RobotArm(Thread):
         self.dobot = DobotCR5(ip)
         if not self.dobot.is_connected:
             self.exit_signal = True
+            
+        self.drop_point: dict[str, float] = {
+                                                "unknow": [0.0, 0.0, 0.0],
+                                                "red-cube": [0.0, 0.0, 0.0],
+                                                "green-cube": [0.0, 0.0, 0.0],
+                                                "blue-cube": [0.0, 0.0, 0.0],
+                                                "yellow-cube": [0.0, 0.0, 0.0]
+                                            }
+        self.simple_drop_point = [0.0, 0.0, 200]
 
     def run(self):
         print("-"*20)
         while not self.exit_signal:
             if self.det.data_flow.obj is not None:
                 obj = self.det.data_flow.obj
-                point_list: list[float] = [obj.potition[0], obj.position[1], obj.position[2], 0, 0, 0] # [x, y, z, rx, ry, rz]
-                self.dobot.RunToPoint(point_list, 0)
-                string = f"Robot get: {obj.id}\nClass: {self.det.model.names[obj.raw_label]}\nPosition X: {obj.position[0]}, Y: {obj.position[1]}, Z: {obj.position[2]}"
-                print('-' * 20)
-                print(string)
+                
+                self.simulate(obj)
+                
+                # self.run_to_object(obj)
+                # self.run_to_drop(obj)
             else:
-                print("Waiting for Objects")
-            sleep(5)
-            
+                print("Waiting for Objects...")
+                sleep(5)
+                
+
+    def simulate(self, obj):
+        self.display(obj)
+        sleep(5)
+    
+    def display(self, obj):
+        print('-' * 20)
+        string = f"Robot get: {obj.id}\nClass: {self.det.model.names[obj.raw_label]}\nPosition X: {obj.position[0]}, Y: {obj.position[1]}, Z: {obj.position[2]}"
+        print(string)
+        print('-' * 20)
+
+    def run_to_object(self, obj):
+        point_list: list[float] = [obj.potition[0], obj.position[1], obj.position[2], 0, 0, 0] # [x, y, z, rx, ry, rz]
+        self.display(obj)
+        self.dobot.RunToPoint(point_list, 0)
+
+    def run_to_drop(self, point_list, obj):
+        class_name: str | None = self.det.model.names[obj.raw_label]
+        r = [0, 0, 0]
+        point_list: list[float] = self.drop_point[class_name] + r
+        
+        self.dobot.RunToPoint(point_list, 0)
+    
     def cal_pisition_relation_cam_robot(self):
         pass
 
