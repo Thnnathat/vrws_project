@@ -6,3 +6,4 @@
 /vision/runs/detect/
 !/train7/
 **yolov8m.pt
+**yolov8n.pt

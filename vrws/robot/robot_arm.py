@@ -1,4 +1,4 @@
-from vision.detector import Detector
+from vrws.vision.detector_main import Detector
 from time import sleep
 from threading import Thread
 from typing import Tuple
