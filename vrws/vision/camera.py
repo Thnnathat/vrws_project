@@ -6,7 +6,7 @@ import numpy as np
 from vision.detector import Detector
 
 class Camera(Zed2i):
-    def __init__(self, event: Event, det: Detector) -> None:
+    def __init__(self, det_cam_event: Event, cam_data_event: Event, det: Detector) -> None:
         super().__init__()
         
         self.image_net: sl.Mat = sl.Mat()
@@ -17,7 +17,8 @@ class Camera(Zed2i):
         self.exit_signal = False
         
         self.det: Detector = det
-        self.__event: Event = event
+        self.__det_cam_event: Event = det_cam_event
+        self.__cam_data_event: Event = cam_data_event
         
         self.lock = Lock()
 
@@ -41,10 +42,10 @@ class Camera(Zed2i):
                 self.image_net = self.image_left_tmp.get_data()
                 self.det.image_net = self.image_net # set an image to detector
                 self.lock.release()
-                self.__event.set()
+                self.__det_cam_event.set()
                 
                 # -- Detection running on the other thread
-                while self.__event.is_set():
+                while self.__det_cam_event.is_set():
                     if self.exit_signal: break
                     sleep(0.001)
 
@@ -54,6 +55,7 @@ class Camera(Zed2i):
                 self.ingest_custom_box_objects(self.det.detections)
                 self.retrieve_objects(self.objects, self.obj_runtime_param)
                 self.lock.release()
+                self.__cam_data_event.wait()
                 
                 # self.real_sence()
                 

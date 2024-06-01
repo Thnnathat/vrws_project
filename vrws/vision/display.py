@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import pyzed.sl as sl
 from vision.detector import Detector
+from vision.data_flow import DataFlow
+from robot.robot_arm import RobotArm
 from vision.viewer.render import GuideLine, Viewer
 from vision.camera import Camera
 from time import sleep
@@ -9,7 +11,7 @@ import time
 from threading import Thread, Lock
 
 class Display(Thread):
-    def __init__(self, det: Detector, camera: Camera) -> None:
+    def __init__(self, det: Detector, camera: Camera, data_flow: DataFlow = None, robot: RobotArm = None) -> None:
         super().__init__()
         self.name = "Display Thread"
 
@@ -18,6 +20,8 @@ class Display(Thread):
         self.exit_signal: bool = False
         self.detector: Detector = det
         self.camera: Camera = camera
+        self.data_flow: DataFlow = data_flow
+        self.robot: RobotArm = robot
 
         self.guide_line = GuideLine()
         self.viewer = Viewer(det.model)
@@ -28,7 +32,6 @@ class Display(Thread):
         self.image_left_ocv = self.camera.get_image_left_ocv
 
     def run(self):
-        lock = Lock()
         while not self.exit_signal:
             objects = self.camera.objects
             enable_tracking = self.camera.obj_param.enable_tracking
@@ -49,5 +52,11 @@ class Display(Thread):
 
     def stop(self):
         self.exit_signal = True
-        self.detector.stop()
-        self.camera.stop()
+        if self.detector is not None:
+            self.detector.stop()
+        if self.camera is not None: 
+            self.camera.stop()
+        if self.data_flow is not None:
+            self.data_flow.stop()
+        if self.robot is not None:
+            self.robot.stop()

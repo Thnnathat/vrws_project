@@ -1,16 +1,20 @@
-from vrws.vision.detector_main import Detector
+from vision.data_flow import DataFlow
+from vision.detector import Detector
 from time import sleep
 from threading import Thread
 from typing import Tuple
 from robot.dobot_api import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
 from threading import Thread
 class RobotArm(Thread):
-    def __init__(self, det: Detector, ip: str) -> None:
+    def __init__(self, detector: Detector, data_flow: DataFlow, ip: str = '192.168.5.1') -> None:
         super().__init__()
         self.name: str = "Robot Thread"
         
-        self.det: Detector = det
+        self.data_flow: DataFlow = data_flow
+        self.detector: Detector = detector
         self.exit_signal: bool = False
+        
+        self.class_names = detector.model.names
 
         # self.dobot = DobotCR5(ip)
         # if not self.dobot.is_connected:
@@ -26,11 +30,14 @@ class RobotArm(Thread):
                                             }
         self.simple_drop_point = [0.0, 0.0, 200]
 
+    def stop(self):
+        self.exit_signal = True
+
     def run(self):
         print("-"*20)
         while not self.exit_signal:
-            if self.det.data_flow.obj is not None:
-                obj = self.det.data_flow.obj
+            if self.data_flow.obj is not None:
+                obj = self.data_flow.obj
                 
                 self.simulate(obj)
                 
@@ -47,7 +54,7 @@ class RobotArm(Thread):
     
     def display(self, obj):
         print('-' * 20)
-        string = f"Robot get: {obj.id}\nClass: {self.det.model.names[obj.raw_label]}\nPosition X: {obj.position[0]}, Y: {obj.position[1]}, Z: {obj.position[2]}"
+        string = f"Robot get: {obj.id}\nClass: {self.class_names[obj.raw_label]}\nPosition X: {obj.position[0]}, Y: {obj.position[1]}, Z: {obj.position[2]}"
         print(string)
         print('-' * 20)
 
@@ -57,7 +64,7 @@ class RobotArm(Thread):
         self.dobot.RunToPoint(point_list, 0)
 
     def run_to_drop(self, point_list, obj):
-        class_name: str | None = self.det.model.names[obj.raw_label]
+        class_name: str | None = self.class_names[obj.raw_label]
         r = [0, 0, 0]
         point_list: list[float] = self.drop_point[class_name] + r
         
