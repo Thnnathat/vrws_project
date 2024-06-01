@@ -3,11 +3,6 @@ from .zed2i_config import Zed2iInitParameters, Zed2iRuntimeParameters, Zed2iObje
 
 class Zed2i(sl.Camera):
     def __init__(self):
-        # self.zed = Camera()
-
-        # สร้าง instance viewer เพื่อไว้แสดงวีดีโอและข้อมูลในรูปแบบ gui
-        # self.viewer = Viewer(self.model)
-
         # กำหนดคุณสมบัติเริ่มต้นของกล้อง
         init_params = Zed2iInitParameters()
         self.runtime_params = Zed2iRuntimeParameters()
