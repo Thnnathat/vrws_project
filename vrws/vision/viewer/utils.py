@@ -36,3 +36,16 @@ def draw_vertical_line(left_display, start_pt, end_pt, clr, thickness):
 
     cv2.line(left_display, (int(start_pt[0]), int(start_pt[1])), (int(pt1[0]), int(pt1[1])), clr, thickness)
     cv2.line(left_display, (int(pt4[0]), int(pt4[1])), (int(end_pt[0]), int(end_pt[1])), clr, thickness)
+
+def xywh_to_rectangle(roi_point: tuple[int, int, int, int], img_scale: list[float, float]):
+    return (
+            (int(roi_point[0] * img_scale[0]), int(roi_point[1] * img_scale[1])),
+            (int((roi_point[0] + roi_point[2]) * img_scale[0]), int((roi_point[1] + roi_point[3]) * img_scale[1]))
+        )
+
+def cvt(pt, scale):
+    """
+    Function that scales point coordinates
+    """
+    out = [pt[0] * scale[0], pt[1] * scale[1]]
+    return out

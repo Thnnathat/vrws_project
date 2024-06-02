@@ -4,9 +4,12 @@ import pyzed.sl as sl
 from threading import Lock, Event
 import numpy as np
 from vision.detector import Detector
+from vision.utils.roi import InterestRegion
+import cv2
+from vision.utils.utils import remap
 
 class Camera(Zed2i):
-    def __init__(self, det_cam_event: Event, cam_data_event: Event, det: Detector) -> None:
+    def __init__(self, det_cam_event: Event, cam_data_event: Event, det: Detector, roi: InterestRegion) -> None:
         super().__init__()
         
         self.image_net: sl.Mat = sl.Mat()
@@ -15,6 +18,8 @@ class Camera(Zed2i):
         
         # flag
         self.exit_signal = False
+        
+        self.roi: InterestRegion = roi
         
         self.det: Detector = det
         self.__det_cam_event: Event = det_cam_event
@@ -28,8 +33,11 @@ class Camera(Zed2i):
         # Utilities for 2D display
         self.__display_resolution = sl.Resolution(min(camera_res.width, 1280), min(camera_res.height, 720))
         self.__image_scale = [self.__display_resolution.width / camera_res.width, self.__display_resolution.height / camera_res.height]
-        self.__image_left_ocv = np.full((self.__display_resolution.height, self.__display_resolution.width, 4), [245, 239, 239, 255], np.uint8) 
+        self.__image_left_ocv = np.full((self.__display_resolution.height, self.__display_resolution.width, 4), [245, 239, 239, 255], np.uint8)
+        
+        self.roi_image = np.full((camera_res.height, camera_res.width, 4), [245, 239, 239, 255], np.uint8)
 
+        
     def stop(self):
         self.exit_signal = True
     
@@ -40,7 +48,8 @@ class Camera(Zed2i):
                 self.lock.acquire()
                 self.retrieve_image(self.image_left_tmp, sl.VIEW.LEFT)
                 self.image_net = self.image_left_tmp.get_data()
-                self.det.image_net = self.image_net # set an image to detector
+                self.roi_image[self.roi.offest_y : self.roi.offest_y + self.roi.height, self.roi.offest_x : self.roi.offest_x + self.roi.width, :] =  self.image_net[self.roi.offest_y : self.roi.offest_y + self.roi.height, self.roi.offest_x : self.roi.offest_x + self.roi.width, :]
+                self.det.image_net = self.roi_image
                 self.lock.release()
                 self.__det_cam_event.set()
                 

@@ -9,9 +9,10 @@ from vision.camera import Camera
 from time import sleep
 import time
 from threading import Thread, Lock
+from vision.utils.roi import InterestRegion
 
 class Display(Thread):
-    def __init__(self, det: Detector, camera: Camera, data_flow: DataFlow = None, robot: RobotArm = None) -> None:
+    def __init__(self, det: Detector, camera: Camera, data_flow: DataFlow = None, robot: RobotArm = None, roi: InterestRegion = None) -> None:
         super().__init__()
         self.name = "Display Thread"
 
@@ -22,6 +23,7 @@ class Display(Thread):
         self.camera: Camera = camera
         self.data_flow: DataFlow = data_flow
         self.robot: RobotArm = robot
+        self.roi: InterestRegion = roi
 
         self.guide_line = GuideLine()
         self.viewer = Viewer(det.model)
@@ -41,10 +43,10 @@ class Display(Thread):
 
             self.viewer.render_2D(self.image_left_ocv, self.image_scale, objects, enable_tracking)
             self.guide_line.draw_star_line_center_frame(self.image_left_ocv)
+            self.guide_line.draw_roi_rectangle(self.image_left_ocv, self.roi.roi_point, self.image_scale)
 
-            # cv2.putText(self.image_left_ocv, fps, (7, 70), cv2.FONT_HERSHEY_SIMPLEX , 3, (100, 255, 0), 3, cv2.LINE_AA) 
-
-            cv2.imshow("Display", self.image_left_ocv)
+            cv2.imshow("Main Display HD Scale", self.image_left_ocv)
+            cv2.imshow("Image Real Scale", self.detector.image_net)
 
             key = cv2.waitKey(1)
             if key & 0XFF == ord('q'):

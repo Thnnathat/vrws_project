@@ -22,6 +22,10 @@ class GuideLine:
         cv2.line(image, (0, center_object[1]), (image.shape[1], center_object[1]), color, 1)
         cv2.line(image, (center_object[0], 0), (center_object[0], image.shape[0]), color, 1)
 
+    def draw_roi_rectangle(self, image, roi_point, img_scale):
+        cv2_rec_point = xywh_to_rectangle(roi_point, img_scale)
+        cv2.rectangle(image, cv2_rec_point[0], cv2_rec_point[1], (255, 0, 0), 1)
+
 class Viewer():
     def __init__(self, model) -> None:
         self.x_position: float = 0.0
@@ -35,14 +39,6 @@ class Viewer():
 
         self.text_top_offest = 80
         self.text_left_offest = 20
-    
-    def cvt(self, pt, scale):
-        """
-        Function that scales point coordinates
-        """
-        out = [pt[0] * scale[0], pt[1] * scale[1]]
-        return out
-
 
     def get_image_position(self, bounding_box_image, img_scale):
         out_position = np.zeros(2)
@@ -61,10 +57,10 @@ class Viewer():
             if render_object(obj, is_tracking_on):
                 base_color = generate_color_id_u(obj.id)
                 # Display image scaled 2D bounding box
-                top_left_corner = self.cvt(obj.bounding_box_2d[0], img_scale)
-                top_right_corner = self.cvt(obj.bounding_box_2d[1], img_scale)
-                bottom_right_corner = self.cvt(obj.bounding_box_2d[2], img_scale)
-                bottom_left_corner = self.cvt(obj.bounding_box_2d[3], img_scale)
+                top_left_corner = cvt(obj.bounding_box_2d[0], img_scale)
+                top_right_corner = cvt(obj.bounding_box_2d[1], img_scale)
+                bottom_right_corner = cvt(obj.bounding_box_2d[2], img_scale)
+                bottom_left_corner = cvt(obj.bounding_box_2d[3], img_scale)
 
                 # Creation of the 2 horizontal lines
                 cv2.line(left_display, (int(top_left_corner[0]), int(top_left_corner[1])),
@@ -98,7 +94,7 @@ class Viewer():
                 
                 guide_line = GuideLine()
                 
-                guide_line.draw_star_center_object(left_display, center_object, base_color)
+                # guide_line.draw_star_center_object(left_display, center_object, base_color)
 
                 left_display = cv2.circle(left_display, center_frame, 1, (255, 0, 0), 2)
                 left_display = cv2.circle(left_display, center_object, 1, (0, 0, 255), 2)
