@@ -20,14 +20,14 @@ class Main:
         cam_data_event = Event()
         
         detector = Detector(det_cam_event, self.model)
-        t_detector = Thread(name="Thread Detector",target=detector.torch_thread)
+        t_detector = Thread(name="Thread Detector", target=detector.torch_thread)
         t_detector.start()
 
         roi = InterestRegion()
         roi.offest_x = 500
         roi.offest_y = 100
         roi.width = 1000
-        roi.height = 800
+        roi.height = 1000
         
         camera = Camera(det_cam_event, cam_data_event, detector, roi)
         t_camera = Thread(name="Thread Camera",target=camera.camera_thread)

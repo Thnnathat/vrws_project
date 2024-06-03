@@ -42,7 +42,7 @@ class Display(Thread):
             np.copyto(self.image_left_ocv, self.image_left.get_data())
 
             self.viewer.render_2D(self.image_left_ocv, self.image_scale, objects, enable_tracking)
-            self.guide_line.draw_star_line_center_frame(self.image_left_ocv)
+            # self.guide_line.draw_star_line_center_frame(self.image_left_ocv)
             self.guide_line.draw_roi_rectangle(self.image_left_ocv, self.roi.roi_point, self.image_scale)
 
             cv2.imshow("Main Display HD Scale", self.image_left_ocv)

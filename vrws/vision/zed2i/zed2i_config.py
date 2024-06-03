@@ -26,6 +26,7 @@ class Zed2iPositionalTrackingParameters(PositionalTrackingParameters):
             # If the camera is static, uncomment the following line to have better performances and boxes sticked to the ground.
         # ? ใช้เมื่อกกล้องไม่อยู่นิ่ง
         self.set_as_static = True
+        self.set_gravity_as_origin = True
         # positional_tracking_parameters.set_floor_as_origin = True;
 
 class Zed2iObjectDetectionParameters(ObjectDetectionParameters):
@@ -38,6 +39,7 @@ class Zed2iObjectDetectionParameters(ObjectDetectionParameters):
 class Zed2iRuntimeParameters(RuntimeParameters):
     def __init__(self) -> None:
         super().__init__()
+        self.measure3D_reference_frame = sl.REFERENCE_FRAME.WORLD
 
 class Zed2iObjectDetectionRuntimeParameters(ObjectDetectionRuntimeParameters):
     def __init__(self) -> None:
