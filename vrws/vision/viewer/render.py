@@ -127,7 +127,8 @@ class Viewer():
                     text_position = (int(position_image[0] - self.text_left_offest), int(position_image[1] + 36 - self.text_top_offest))
                     cv2.putText(left_display, text, text_position, cv2.FONT_HERSHEY_COMPLEX_SMALL, self.ocv_font_size, text_color, 1)
 
-                    text = "Z: " + str(round(self.z_position, 2)) + "mm"
+                    # text = "Z: " + str(round(self.z_position, 2)) + "mm"
+                    text = "Z: " + str(round(0.6889890534449 * self.y_position + self.z_position, 2)) + "mm"
                     text_position = (int(position_image[0] - self.text_left_offest), int(position_image[1] + 48 - self.text_top_offest))
                     cv2.putText(left_display, text, text_position, cv2.FONT_HERSHEY_COMPLEX_SMALL, self.ocv_font_size, text_color, 1)
 
