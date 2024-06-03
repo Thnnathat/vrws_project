@@ -27,3 +27,7 @@ class Zed2i(sl.Camera):
             exit()
         print("Camera is openned.")
         return status
+
+class Zed2iSensor(sl.SensorsData):
+    def __init__(self):
+        super().__init__()
