@@ -1,7 +1,8 @@
 from queue import Queue
-from vision.viewer.utils import render_object
 import pyzed.sl as sl
 from threading import Thread, Lock, Event
+
+from vision.viewer import render_object
 from vision.camera import Camera
 
 class DataFlow(Thread):

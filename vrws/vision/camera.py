@@ -1,10 +1,10 @@
-from vision.zed2i.zed2i import Zed2i
+from .zed2i import Zed2i
 from time import sleep
 import pyzed.sl as sl
 from threading import Lock, Event
 import numpy as np
-from vision.detector import Detector
-from vision.utils.roi import InterestRegion
+from .detector import Detector
+from .utils import InterestRegion
 import cv2
 
 class Camera(Zed2i):

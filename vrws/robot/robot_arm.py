@@ -1,4 +1,4 @@
-from vision.data_flow import DataFlow
+from pipe import DataFlow
 from vision.detector import Detector
 from time import sleep
 from threading import Thread

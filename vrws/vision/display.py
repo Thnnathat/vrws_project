@@ -1,15 +1,13 @@
 import cv2
 import numpy as np
 import pyzed.sl as sl
-from vision.detector import Detector
-from vision.data_flow import DataFlow
-from robot.robot_arm import RobotArm
-from vision.viewer.render import GuideLine, Viewer
-from vision.camera import Camera
-from time import sleep
-import time
+from .detector import Detector
+from pipe import DataFlow
+from robot import RobotArm
+from .viewer import GuideLine, Viewer
+from .camera import Camera
 from threading import Thread, Lock
-from vision.utils.roi import InterestRegion
+from .utils import InterestRegion
 
 class Display(Thread):
     def __init__(self, det: Detector, camera: Camera, data_flow: DataFlow = None, robot: RobotArm = None, roi: InterestRegion = None) -> None:
