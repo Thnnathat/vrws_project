@@ -120,8 +120,8 @@ class Viewer():
                 cv2.putText(left_display, confidence_text, text_position, cv2.FONT_HERSHEY_COMPLEX_SMALL, self.ocv_font_size, text_color, 1)
 
                 self.x_position = obj.position[0]
-                self.y_position = obj.position[1]
-                self.z_position = obj.position[2]
+                self.y_position = obj.position[2]
+                self.z_position = obj.position[1]
 
                 # Diplay Object distance to camera as text
                 if np.isfinite(self.x_position and self.y_position and self.z_position):

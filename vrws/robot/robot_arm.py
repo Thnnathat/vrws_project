@@ -54,7 +54,7 @@ class RobotArm(Thread):
     
     def display(self, obj):
         print('-' * 20)
-        string = f"Robot get: {obj.id}\nClass: {self.class_names[obj.raw_label]}\nPosition X: {obj.position[0]}, Y: {obj.position[1]}, Z: {obj.position[2]}"
+        string = f"Robot get: {obj.id}\nClass: {self.class_names[obj.raw_label]}\nPosition X: {obj.position[0]}, Y: {obj.position[2]}, Z: {obj.position[1]}"
         print(string)
         print('-' * 20)
 
