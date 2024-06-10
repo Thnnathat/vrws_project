@@ -47,8 +47,10 @@ class Camera(Zed2i):
                 self.lock.acquire()
                 self.retrieve_image(self.image_left_tmp, sl.VIEW.LEFT)
                 self.image_net = self.image_left_tmp.get_data()
+
                 self.roi_image[self.roi.offest_y : self.roi.offest_y + self.roi.height, self.roi.offest_x : self.roi.offest_x + self.roi.width, :] =  self.image_net[self.roi.offest_y : self.roi.offest_y + self.roi.height, self.roi.offest_x : self.roi.offest_x + self.roi.width, :]
                 self.det.image_net = self.roi_image
+
                 self.lock.release()
                 self.__det_cam_event.set()
                 

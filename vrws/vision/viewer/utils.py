@@ -43,6 +43,13 @@ def xywh_to_rectangle(roi_point: tuple[int, int, int, int], img_scale: list[floa
             (int((roi_point[0] + roi_point[2]) * img_scale[0]), int((roi_point[1] + roi_point[3]) * img_scale[1]))
         )
 
+def roi_point_polygon(roi_point, img_scale):
+    pts = []
+    for point in roi_point:
+        pts.append([int(point[0] * img_scale[0]), int(point[1] * img_scale[1])])
+
+    return pts
+
 def cvt(pt, scale):
     """
     Function that scales point coordinates

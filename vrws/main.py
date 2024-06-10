@@ -6,7 +6,7 @@ from time import sleep
 
 from vision import Camera
 from pipe import DataFlow
-from vision import InterestRegion
+from vision.utils import InterestRegion
 
 class Main:
     def __init__(self) -> None:
@@ -28,6 +28,9 @@ class Main:
         roi.offest_y = 100
         roi.width = 1000
         roi.height = 1000
+
+        roi.set_poly_point((700, 70), (500, 1100), (1700, 1100), (1400, 70))
+        # roi.set_poly_point((500, 100), (1000, 100), (1500, 1100), (1500, 100))
         
         camera = Camera(det_cam_event, cam_data_event, detector, roi)
         t_camera = Thread(name="Thread Camera",target=camera.camera_thread)

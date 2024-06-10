@@ -26,6 +26,12 @@ class GuideLine:
         cv2_rec_point = xywh_to_rectangle(roi_point, img_scale)
         cv2.rectangle(image, cv2_rec_point[0], cv2_rec_point[1], (255, 0, 0), 1)
 
+    def draw_roi_polygon(self, image, roi_point, image_scale):
+        pts_list = roi_point_polygon(roi_point, image_scale)
+        pts = np.array(pts_list, np.int32)
+        pts = pts.reshape((-1, 1, 2))
+        cv2.polylines(image, [pts], True, (0, 0, 255), 2)
+
 class Viewer():
     def __init__(self, model) -> None:
         self.x_position: float = 0.0
@@ -94,7 +100,7 @@ class Viewer():
                 
                 guide_line = GuideLine()
                 
-                guide_line.draw_star_center_object(left_display, center_object, base_color)
+                # guide_line.draw_star_center_object(left_display, center_object, base_color)
 
                 left_display = cv2.circle(left_display, center_frame, 1, (255, 0, 0), 2)
                 left_display = cv2.circle(left_display, center_object, 1, (0, 0, 255), 2)
