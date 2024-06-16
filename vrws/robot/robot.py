@@ -88,6 +88,7 @@ class DobotCR5:
         self.ip: str = ip
         self.dashboardPort: int = 29999
         self.feedPort: int = 30004
+        self.movePort: int = 30005
 
         self.dashboard: DobotApiDashboard | None = None
         self.feed: DobotApiFeedBack | None = None
@@ -95,20 +96,21 @@ class DobotCR5:
         
         self.is_connected: bool = False
         self.exit_signal: bool = False
-        self.dashboard, self.feed = self.Connect()
+
+        # เชื่อมต่อ Robot
+        self.dashboard: DobotApiDashboard | None = None
+        self.feed: DobotApiFeedBack | None = None
+        self.move: DobotApiDashMove | None = None
 
         self.t_clearError = Thread(target=self.ClearRobotError)
 
     def Connect(self) -> Tuple[DobotApiDashboard, DobotApiFeedBack]:
-        try: 
-            dashboard = DobotApiDashboard(self.ip, self.dashboardPort)
-            feed = DobotApiFeedBack(self.ip, self.feedPort)
-            self.is_connected = True
-            self.t_clearError.start()
-            return dashboard, feed
-        except:
-            self.exit_signal = True
-            print("Dobot connection error.")
+        self.dashboard = DobotApiDashboard(self.ip, self.dashboardPort)
+        self.feed = DobotApiFeedBack(self.ip, self.feedPort)
+        self.move = DobotApiDashMove(self.ip, self.movePort)
+        self.is_connected = True
+        self.t_clearError.start()
+        print("Dobot connection error.")
         
     def Enable(self):
         enableState = self.parseResultId(self.dashboard.EnableRobot())
