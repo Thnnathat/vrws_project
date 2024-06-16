@@ -120,8 +120,8 @@ class DobotCR5:
     def RunToPoint(self, point_list: list[float], coordinateMode: int):
         while True:
             p2id = self.RunPoint(point_list, coordinateMode)        
-            if p2id[0] == 0: # No error
-                self.move.WaitArrive(p2id[1]) # Wait for point
+            if p2id[0] == 0: # ไม่มี error (ถ้ามี error จะทำการส่งคำสั่งใหม่เรื่อยๆ)
+                self.move.WaitArrive(p2id[1]) # รอให้แขกลถึงตำแหน่ง
                 break
 
     def RunPoint(self, point_list: list[float], coordinateMode: int):
