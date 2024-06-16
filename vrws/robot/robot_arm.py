@@ -3,7 +3,7 @@ from vision.detector import Detector
 from time import sleep
 from threading import Thread
 from typing import Tuple
-from robot.dobot_api import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
+from vrws_project.vrws.robot.dobot_api_v4 import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
 from threading import Thread
 class RobotArm(Thread):
     def __init__(self, detector: Detector, data_flow: DataFlow, ip: str = '192.168.5.1') -> None:
