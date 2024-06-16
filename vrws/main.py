@@ -1,5 +1,5 @@
 from vision import Detector
-from robot import RobotArm
+from robot import RobotControl
 from vision import Display
 from threading import Thread, Event
 from time import sleep
@@ -39,7 +39,7 @@ class Main:
         data_flow = DataFlow(cam_data_event, camera)
         data_flow.start()
         
-        robot = RobotArm(detector, data_flow, '192.168.5.1')
+        robot = RobotControl(detector, data_flow, '192.168.5.1')
         robot.start()
         
         display = Display(detector, camera, data_flow, robot, roi)

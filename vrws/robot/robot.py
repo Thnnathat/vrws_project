@@ -3,16 +3,19 @@ from vision.detector import Detector
 from time import sleep
 from threading import Thread
 from typing import Tuple
-from vrws_project.vrws.robot.dobot_api_v4 import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
+from dobot_api_v4 import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
 from threading import Thread
-class RobotArm(Thread):
-    def __init__(self, detector: Detector, data_flow: DataFlow, ip: str = '192.168.5.1') -> None:
+import re
+
+class RobotControl(Thread):
+    def __init__(self, detector: Detector, data_flow: DataFlow, cam_position: tuple[float, float, float], ip: str = '192.168.5.1') -> None:
         super().__init__()
         self.name: str = "Robot Thread"
         
         self.data_flow: DataFlow = data_flow
         self.detector: Detector = detector
         self.exit_signal: bool = False
+        self.cam_position: tuple[float, float, float] = cam_position
         
         self.class_names = detector.model.names
 
@@ -22,13 +25,12 @@ class RobotArm(Thread):
         # self.dobot.Enable()
             
         self.drop_point: dict[str, float] = {
-                                                "unknow": [0.0, 0.0, 0.0],
                                                 "red-cube": [0.0, 0.0, 0.0],
                                                 "green-cube": [0.0, 0.0, 0.0],
                                                 "blue-cube": [0.0, 0.0, 0.0],
                                                 "yellow-cube": [0.0, 0.0, 0.0]
                                             }
-        self.simple_drop_point = [0.0, 0.0, 200]
+        # self.simple_drop_point = [0.0, 0.0, 200]
 
     def stop(self):
         self.exit_signal = True
@@ -42,7 +44,9 @@ class RobotArm(Thread):
                 self.simulate(obj)
                 
                 # self.run_to_object(obj)
+                self.hold()
                 # self.run_to_drop(obj)
+                self.release()
             else:
                 print("Waiting for Objects...")
                 sleep(5)
@@ -69,6 +73,12 @@ class RobotArm(Thread):
         point_list: list[float] = self.drop_point[class_name] + r
         
         self.dobot.RunToPoint(point_list, 0)
+
+    def hold(self):
+        pass
+    
+    def release(self):
+        pass
     
     def cal_pisition_relation_cam_robot(self):
         pass
@@ -101,7 +111,7 @@ class DobotCR5:
             print("Dobot connection error.")
         
     def Enable(self):
-        enableState = self.dashboard.ParseResultId(self.dashboard.EnableRobot())
+        enableState = self.parseResultId(self.dashboard.EnableRobot())
         if enableState[0] != 0:
             print("Failed to enable: Check whether port 29999 is occupied.")
             return
@@ -116,10 +126,25 @@ class DobotCR5:
 
     def RunPoint(self, point_list: list[float], coordinateMode: int):
         recv_movemess = self.dashboard.MovJ(point_list[0], point_list[1], point_list[2], point_list[3], point_list[4], point_list[5], coordinateMode) # P = [x, y, z, rx, ry, rz]
-        commandArrID = self.dashboard.ParseResultId(recv_movemess)
+        commandArrID = self.parseResultId(recv_movemess)
         return commandArrID
 
     def ClearRobotError(self):
         while not self.exit_signal:
             self.dashboard.ClearError()
             sleep(5)
+
+    def parseResultId(self, valueRecv):
+        if valueRecv.find("Not Tcp") != -1:  # 通过返回值判断机器是否处于tcp模式
+            print("Control Mode Is Not Tcp")
+            return [1]
+        recvData = re.findall(r'-?\d+', valueRecv)
+        recvData = [int(num) for num in recvData] # ! ตำแหน่ง
+        #  返回tcp指令返回值的所有数字数组
+        if len(recvData) == 0:
+            return [2]
+        return recvData
+            
+class GripperNS21:
+    def __init__(self) -> None:
+        pass
