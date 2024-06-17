@@ -3,14 +3,14 @@ import numpy as np
 import pyzed.sl as sl
 from .detector import Detector
 from pipe import DataFlow
-from robot import RobotArm
+from robot import RobotControl
 from .viewer import GuideLine, Viewer
 from .camera import Camera
 from threading import Thread, Lock
 from .utils import InterestRegion
 
 class Display(Thread):
-    def __init__(self, det: Detector, camera: Camera, data_flow: DataFlow = None, robot: RobotArm = None, roi: InterestRegion = None) -> None:
+    def __init__(self, det: Detector, camera: Camera, data_flow: DataFlow = None, robot: RobotControl = None, roi: InterestRegion = None) -> None:
         super().__init__()
         self.name = "Display Thread"
 
@@ -20,7 +20,7 @@ class Display(Thread):
         self.detector: Detector = det
         self.camera: Camera = camera
         self.data_flow: DataFlow = data_flow
-        self.robot: RobotArm = robot
+        self.robot: RobotControl = robot
         self.roi: InterestRegion = roi
 
         self.guide_line = GuideLine()

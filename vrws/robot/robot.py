@@ -3,7 +3,7 @@ from vision.detector import Detector
 from time import sleep
 from threading import Thread
 from typing import Tuple
-from dobot_api_v4 import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
+from .dobot_api_v4 import DobotApiDashboard, DobotApiFeedBack, DobotApiDashMove
 from threading import Thread
 import re
 
@@ -30,6 +30,8 @@ class RobotControl(Thread):
                                                 "blue-cube": [0.0, 0.0, 0.0],
                                                 "yellow-cube": [0.0, 0.0, 0.0]
                                             }
+        
+        self.r: list[float] = [0.0, 0.0, 0.0]
         # self.simple_drop_point = [0.0, 0.0, 200]
 
     def stop(self):
@@ -63,15 +65,13 @@ class RobotControl(Thread):
         print('-' * 20)
 
     def run_to_object(self, obj):
-        point_list: list[float] = [obj.potition[0], obj.position[1], obj.position[2], 0, 0, 0] # [x, y, z, rx, ry, rz]
+        point_list: list[float] = self.cal_pisition_relation_cam_robot(obj) # [x, y, z, rx, ry, rz]
         self.display(obj)
         self.dobot.RunToPoint(point_list, 0)
 
-    def run_to_drop(self, point_list, obj):
+    def run_to_drop(self, obj):
         class_name: str | None = self.class_names[obj.raw_label]
-        r = [0, 0, 0]
-        point_list: list[float] = self.drop_point[class_name] + r
-        
+        point_list: list[float] = self.drop_point[class_name] + self.r
         self.dobot.RunToPoint(point_list, 0)
 
     def hold(self):
@@ -80,8 +80,9 @@ class RobotControl(Thread):
     def release(self):
         pass
     
-    def cal_pisition_relation_cam_robot(self):
-        pass
+    def cal_pisition_relation_cam_robot(self, obj) -> list[float]:
+        point_list: list[float] = [obj.potition[0] - self.cam_position[0], obj.position[2] - self.cam_position[1], obj.position[1] - self.cam_position[2]] + self.r
+        return point_list
 
 class DobotCR5:
     def __init__(self, ip: str) -> None:
@@ -89,10 +90,6 @@ class DobotCR5:
         self.dashboardPort: int = 29999
         self.feedPort: int = 30004
         self.movePort: int = 30005
-
-        self.dashboard: DobotApiDashboard | None = None
-        self.feed: DobotApiFeedBack | None = None
-        self.move: DobotApiDashMove | None = None
         
         self.is_connected: bool = False
         self.exit_signal: bool = False
@@ -104,7 +101,7 @@ class DobotCR5:
 
         self.t_clearError = Thread(target=self.ClearRobotError)
 
-    def Connect(self) -> Tuple[DobotApiDashboard, DobotApiFeedBack]:
+    def Connect(self):
         self.dashboard = DobotApiDashboard(self.ip, self.dashboardPort)
         self.feed = DobotApiFeedBack(self.ip, self.feedPort)
         self.move = DobotApiDashMove(self.ip, self.movePort)
@@ -137,12 +134,11 @@ class DobotCR5:
             sleep(5)
 
     def parseResultId(self, valueRecv):
-        if valueRecv.find("Not Tcp") != -1:  # 通过返回值判断机器是否处于tcp模式
+        if valueRecv.find("Not Tcp") != -1:
             print("Control Mode Is Not Tcp")
             return [1]
         recvData = re.findall(r'-?\d+', valueRecv)
         recvData = [int(num) for num in recvData] # ! ตำแหน่ง
-        #  返回tcp指令返回值的所有数字数组
         if len(recvData) == 0:
             return [2]
         return recvData
