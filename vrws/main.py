@@ -28,7 +28,7 @@ class Main:
         det_cam_event = Event()
         cam_data_event = Event()
         
-        detector = Detector(det_cam_event, self.model)
+        detector = Detector(det_cam_event, self.model, conf_thres=0.7)
         t_detector = Thread(name="Thread Detector", target=detector.torch_thread)
         t_detector.start()
 
