@@ -15,6 +15,15 @@ class Main:
         model_version = '7'
         self.model = f'E:/Computer Engineering/Computer Engineering Project/vrws_project/vision/runs/detect/train{model_version}/weights/{model}.pt'
 
+        self.cam_position: tuple[float, float, float] = [0, 0, 0]
+        
+        self.roi = InterestRegion()
+        self.roi.offest_x = 500
+        self.roi.offest_y = 100
+        self.roi.width = 1000
+        self.roi.height = 1000
+        self.roi.set_poly_point((700, 70), (500, 1100), (1700, 1100), (1400, 70))
+
     def start(self):
         det_cam_event = Event()
         cam_data_event = Event()
@@ -23,26 +32,17 @@ class Main:
         t_detector = Thread(name="Thread Detector", target=detector.torch_thread)
         t_detector.start()
 
-        roi = InterestRegion()
-        roi.offest_x = 500
-        roi.offest_y = 100
-        roi.width = 1000
-        roi.height = 1000
-
-        roi.set_poly_point((700, 70), (500, 1100), (1700, 1100), (1400, 70))
-        # roi.set_poly_point((500, 100), (1000, 100), (1500, 1100), (1500, 100))
-        
-        camera = Camera(det_cam_event, cam_data_event, detector, roi)
+        camera = Camera(det_cam_event, cam_data_event, detector, self.roi)
         t_camera = Thread(name="Thread Camera",target=camera.camera_thread)
         t_camera.start()
 
         data_flow = DataFlow(cam_data_event, camera)
         data_flow.start()
         
-        robot = RobotControl(detector, data_flow, '192.168.5.1')
+        robot = RobotControl(detector, data_flow, self.cam_position,'192.168.5.1')
         robot.start()
         
-        display = Display(detector, camera, data_flow, robot, roi)
+        display = Display(detector, camera, data_flow, robot, self.roi)
         display.start()
 
 if __name__ == "__main__":
