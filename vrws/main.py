@@ -1,12 +1,12 @@
-from vision import Detector
-from robot import RobotControl
-from vision import Display
 from threading import Thread, Event
-from time import sleep
 
-from vision import Camera
-from pipe import DataFlow
+from vision.detector import Detector
+from vision.display import Display
+from vision.camera import Camera
 from vision.utils import InterestRegion
+
+from robot import RobotControl
+from pipe import DataFlow
 
 class Main:
     def __init__(self) -> None:
