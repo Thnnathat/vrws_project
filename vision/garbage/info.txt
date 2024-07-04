@@ -1,0 +1,5 @@
+object-material-damage
+
+object -> รูปแบบวัตถุ
+material -> วัสดุ
+damage -> ความเสียหาย
