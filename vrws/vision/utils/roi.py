@@ -1,5 +1,8 @@
 from shapely.geometry import Polygon
 import numpy as np
+from matplotlib.path import Path
+import pylab as plt
+from typing import Literal
 
 class InterestRegion:
     def __init__(self):
@@ -13,14 +16,32 @@ class InterestRegion:
         self.__bottom_left: tuple[int, int] = (0, 0)
         self.__bottom_right: tuple[int, int] = (0, 0)
 
-    def crop(self, image, roi_point):
-        polygon = Polygon(np.array(roi_point))
+    def crop(self, image_frame, image, width, height, shape: Literal["regtangle", "polygon"]):
+        image_bound = image_frame.copy()
+        if shape == "regtangle":
+            image_bound[self.__offest_y : self.__offest_y + self.__height, self.__offest_x : self.__offest_x + self.__width, :] = image[self.__offest_y : self.__offest_y + self.__height, self.__offest_x : self.__offest_x + self.__width, :]
+            return image_bound
+        if shape == "polygon":
+            mask = self.poly_mask(width, height)
+            image_mask = mask.reshape(height, width)
+            image_bound[image_mask, :] = image[image_mask, :]
+            return image_bound
+    
+    def poly_mask(self, width, height):
+        poly_path = Path(self.transform_points_to_path(self.poly_point))
 
-        mask = np.where(polygon.contains(np.indices(image.shape[0], image.shape[1])))
+        x, y = np.mgrid[:height, :width]
+        coors = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
 
-        cropped_image = image[mask[0], mask[1]]
-
-        return cropped_image
+        mask = poly_path.contains_points(coors)
+        return mask
+    
+    def transform_points_to_path(self, point_list):
+        # (left, top), (left, bottom), (right, bottom), (right, top)
+        p = point_list
+        # (top, left), (bottom, left), (bottom, rigth), (top, right)
+        points = ((p[1][1], p[1][0]), (p[0][1], p[0][0]), (p[3][1], p[3][0]), (p[2][1], p[2][0]))
+        return points
 
     @property
     def roi_point(self):

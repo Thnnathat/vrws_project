@@ -28,13 +28,15 @@ class Camera(Zed2i):
 
         # Display
         camera_infos = self.get_camera_information()
-        camera_res = camera_infos.camera_configuration.resolution
+        self.camera_res = camera_infos.camera_configuration.resolution
+        self.res_width = self.camera_res.width
+        self.res_height = self.camera_res.height
         # Utilities for 2D display
-        self.__display_resolution = sl.Resolution(min(camera_res.width, 1280), min(camera_res.height, 720))
-        self.__image_scale = [self.__display_resolution.width / camera_res.width, self.__display_resolution.height / camera_res.height]
+        self.__display_resolution = sl.Resolution(min(self.camera_res.width, 1280), min(self.camera_res.height, 720))
+        self.__image_scale = [self.__display_resolution.width / self.camera_res.width, self.__display_resolution.height / self.camera_res.height]
         self.__image_left_ocv = np.full((self.__display_resolution.height, self.__display_resolution.width, 4), [245, 239, 239, 255], np.uint8)
         
-        self.roi_image = np.full((camera_res.height, camera_res.width, 4), [245, 239, 239, 255], np.uint8)
+        self.__roi_image_template = np.full((self.camera_res.height, self.camera_res.width, 4), [245, 239, 239, 255], np.uint8)
 
         
     def stop(self):
@@ -47,9 +49,8 @@ class Camera(Zed2i):
                 self.lock.acquire()
                 self.retrieve_image(self.image_left_tmp, sl.VIEW.LEFT)
                 self.image_net = self.image_left_tmp.get_data()
-
-                self.roi_image[self.roi.offest_y : self.roi.offest_y + self.roi.height, self.roi.offest_x : self.roi.offest_x + self.roi.width, :] =  self.image_net[self.roi.offest_y : self.roi.offest_y + self.roi.height, self.roi.offest_x : self.roi.offest_x + self.roi.width, :]
-                self.det.image_net = self.roi_image
+                image_net = self.roi.crop(self.__roi_image_template, self.image_net, self.res_width, self.res_height, shape="regtangle")
+                self.det.image_net = image_net
 
                 self.lock.release()
                 self.__det_cam_event.set()

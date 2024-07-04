@@ -13,7 +13,7 @@ class Main:
 
         model = 'best'
         model_version = '7'
-        self.model = f'E:/Computer Engineering/Computer Engineering Project/vrws_project/vision/runs/detect/train{model_version}/weights/{model}.pt'
+        self.model = f'E:/Computer Engineering/Computer Engineering Project/vrws_project/vision/color_cube/runs/detect/train{model_version}/weights/{model}.pt'
 
         self.cam_position: tuple[float, float, float] = [0, 0, 0]
         
@@ -22,7 +22,7 @@ class Main:
         self.roi.offest_y = 100
         self.roi.width = 1000
         self.roi.height = 1000
-        self.roi.set_poly_point((700, 70), (500, 1100), (1700, 1100), (1400, 70))
+        self.roi.set_poly_point((700, 70), (500, 1080), (1700, 1080), (1400, 70)) # (left, top), (left, bottom), (right, bottom), (right, top)
 
     def start(self):
         det_cam_event = Event()
