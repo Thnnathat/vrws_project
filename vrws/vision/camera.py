@@ -49,7 +49,7 @@ class Camera(Zed2i):
                 self.lock.acquire()
                 self.retrieve_image(self.image_left_tmp, sl.VIEW.LEFT)
                 self.image_net = self.image_left_tmp.get_data()
-                image_net = self.roi.crop(self.__roi_image_template, self.image_net, self.res_width, self.res_height, shape="regtangle")
+                image_net = self.roi.crop(self.__roi_image_template, self.image_net, self.res_width, self.res_height, shape="polygon")
                 self.det.image_net = image_net
 
                 self.lock.release()
@@ -67,6 +67,12 @@ class Camera(Zed2i):
                 self.retrieve_objects(self.objects, self.obj_runtime_param)
                 self.lock.release()
                 self.__cam_data_event.wait()
+
+                # cv2.imshow("Image Real Scale", image_net)
+
+                # key = cv2.waitKey(1)
+                # if key & 0XFF == ord('q'):
+                #     self.stop()
                 
                 # self.real_sence()
                 

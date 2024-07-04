@@ -45,7 +45,7 @@ class Display(Thread):
             self.guide_line.draw_roi_polygon(self.image_left_ocv, self.roi.poly_point, self.image_scale)
 
             cv2.imshow("Main Display HD Scale", self.image_left_ocv)
-            cv2.imshow("Image Real Scale", self.detector.image_net)
+            # cv2.imshow("Image Real Scale", self.detector.image_net)
 
             key = cv2.waitKey(1)
             if key & 0XFF == ord('q'):

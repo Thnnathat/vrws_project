@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib.path import Path
 import pylab as plt
 from typing import Literal
+import cv2
 
 class InterestRegion:
     def __init__(self):
@@ -28,12 +29,14 @@ class InterestRegion:
             return image_bound
     
     def poly_mask(self, width, height):
-        poly_path = Path(self.transform_points_to_path(self.poly_point))
+        points = np.array(self.poly_point, dtype=np.int32).reshape(-1, 1, 2)
 
-        x, y = np.mgrid[:height, :width]
-        coors = np.hstack((x.reshape(-1, 1), y.reshape(-1, 1)))
+        # Create mask with black background and white interior
+        mask = np.zeros((height, width), dtype=np.uint8)
+        cv2.fillPoly(mask, [points], (255, 255, 255))
 
-        mask = poly_path.contains_points(coors)
+        # Convert mask to boolean (optional)
+        mask = mask.astype(bool)
         return mask
     
     def transform_points_to_path(self, point_list):
