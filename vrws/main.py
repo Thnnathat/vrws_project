@@ -23,6 +23,7 @@ class Main:
         self.roi.width = 1000
         self.roi.height = 1000
         self.roi.set_poly_point((700, 70), (500, 1080), (1700, 1080), (1400, 70)) # (left, top), (left, bottom), (right, bottom), (right, top)
+        # self.roi.roi_shape = "polygon"
 
     def start(self):
         det_cam_event = Event()

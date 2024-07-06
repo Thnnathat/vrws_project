@@ -17,9 +17,12 @@ class InterestRegion:
         self.__bottom_left: tuple[int, int] = (0, 0)
         self.__bottom_right: tuple[int, int] = (0, 0)
 
-    def crop(self, image_frame, image, width, height, shape: Literal["regtangle", "polygon"]):
+        self.__roi_shape: Literal["rectangle", "polygon"] | None = None
+
+    def crop(self, image_frame, image, width, height):
         image_bound = image_frame.copy()
-        if shape == "regtangle":
+        shape = self.__roi_shape
+        if shape == "rectangle":
             image_bound[self.__offest_y : self.__offest_y + self.__height, self.__offest_x : self.__offest_x + self.__width, :] = image[self.__offest_y : self.__offest_y + self.__height, self.__offest_x : self.__offest_x + self.__width, :]
             return image_bound
         if shape == "polygon":
@@ -27,6 +30,7 @@ class InterestRegion:
             image_mask = mask.reshape(height, width)
             image_bound[image_mask, :] = image[image_mask, :]
             return image_bound
+        return image
     
     def poly_mask(self, width, height):
         points = np.array(self.poly_point, dtype=np.int32).reshape(-1, 1, 2)
@@ -91,3 +95,10 @@ class InterestRegion:
         self.__top_right = top_right_point
         self.__bottom_left = bottom_left_point
         self.__bottom_right = bottom_right_point
+        
+    @property
+    def roi_shape(self):
+        return self.__roi_shape
+    @roi_shape.setter
+    def roi_shape(self, value):
+        self.__roi_shape = value
