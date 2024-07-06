@@ -6,7 +6,7 @@ class Zed2iInitParameters(InitParameters):
         super().__init__()
         # Create a InitParameters object and set configuration parameters
         self.depth_mode = sl.DEPTH_MODE.NEURAL  # QUALITY
-        self.coordinate_system = sl.COORDINATE_SYSTEM.RIGHT_HANDED_Y_UP
+        self.coordinate_system = sl.COORDINATE_SYSTEM.LEFT_HANDED_Y_UP
         # self.coordinate_system = sl.COORDINATE_SYSTEM.IMAGE
         self.camera_resolution = sl.RESOLUTION.HD1080
         self.depth_maximum_distance = 2000
