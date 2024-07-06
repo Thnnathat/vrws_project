@@ -22,14 +22,14 @@ class Main:
         self.roi.offest_y = 100
         self.roi.width = 1000
         self.roi.height = 1000
-        self.roi.set_poly_point((700, 70), (500, 1080), (1700, 1080), (1400, 70)) # (left, top), (left, bottom), (right, bottom), (right, top)
-        # self.roi.roi_shape = "polygon"
+        self.roi.set_poly_point((600, 0), (450, 1080), (1400, 1080), (1300, 0)) # (left, top), (left, bottom), (right, bottom), (right, top)
+        self.roi.roi_shape = "polygon"
 
     def start(self):
         det_cam_event = Event()
         cam_data_event = Event()
         
-        detector = Detector(det_cam_event, self.model, conf_thres=0.7)
+        detector = Detector(det_cam_event, self.model, conf_thres=0.5)
         t_detector = Thread(name="Thread Detector", target=detector.torch_thread)
         t_detector.start()
 
@@ -40,8 +40,8 @@ class Main:
         data_flow = DataFlow(cam_data_event, camera)
         data_flow.start()
         
-        robot = RobotControl(detector, data_flow, self.cam_position,'192.168.5.1')
-        robot.start()
+        # robot = RobotControl(detector, data_flow, self.cam_position,'192.168.5.1')
+        # robot.start()
         
         display = Display(detector, camera, data_flow, robot, self.roi)
         display.start()
