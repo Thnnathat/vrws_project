@@ -4,6 +4,7 @@ from threading import Thread, Lock, Event
 
 from vision.viewer import render_object
 from vision.camera import Camera
+from time import sleep
 
 class DataFlow(Thread):
     def __init__(self, cam_data_event: Event, camera: Camera):
@@ -29,6 +30,7 @@ class DataFlow(Thread):
     def run(self):
         while not self.exit_signal:
             self.insert_data_static(self.camera.objects, self.camera.obj_param.enable_tracking)
+            sleep(0.5) #! Unlock
 
     def insert_data_static(self, objects, is_tracking_on):
         self.__cam_data_event.clear()
@@ -50,7 +52,7 @@ class DataFlow(Thread):
         ids = ""
         for i in self.item:
             ids += f"{i.id},"
-        print(ids, end="\r")
+        # print(ids, end="\r")
 
     def sorting(self):
         pass
